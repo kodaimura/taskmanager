@@ -1,0 +1,66 @@
+{{template "header" .}}
+<div class="d-flex flex-row w-100 min-vh-100">
+	<nav class="sidebar bg-light navbar-light px-3">
+		<a href="group">Group Setting</a>
+		<div class="mt-3">
+		{{.groupname}} members
+		</div>
+		<ul class="navbar-nav px-3">
+		{{ range .members }}
+		<li type="circle" class="nav-item">
+			<a href="/members/{{.UId}}" class="link-secondary">
+				{{.UserName}}
+			</a>
+		</li>
+		{{ end }}
+		</ul>
+	</nav>
+
+	<div class="w-75 px-3">
+		<h3>{{.username}}</h3>
+		<div class="table-responsive">
+			<table class="table table-bordered">
+		    <thead class="table-primary">
+		        <tr>
+		            <th scope="col" style="width:100px;">ID</th>
+		            <th scope="col">Task</th>
+		            <th scope="col" style="min-width:150px; width:150px;">Deadline</th>
+		            <th scope="col" style="min-width:50px; width:50px;">%</th>
+		            <th scope="col" style="width:100px;">State</th>
+		        </tr>
+		    </thead>
+		    <tbody>
+		    	{{ range .tasks }}
+
+		    	{{ if eq .StateId 1 }}
+  					<tr class="table-light">
+				{{ else if eq .StateId 2 }}
+					<tr class="table-secondary">
+				{{ else if eq .StateId 3 }}
+					<tr class="bg-secondary">
+				{{ else }}
+					<tr class="bg-dark text-muted">
+				{{ end }}
+		        	<td scope="col">{{.TId}}</td>
+		            <td scope="col">{{.Task}}</td>
+		            <td scope="col">{{.Deadline}}</td>
+		            <td scope="col">{{.Percent}}</td>
+		            <td scope="col">{{.State}}</td>
+		        </tr>
+		        {{ end }}
+		    </tbody>
+		</table>
+		</div>
+
+	</div>
+</div>
+<script>
+	let dt = new Date()
+	let y = dt.getFullYear();
+  	let m = ('00' + (dt.getMonth()+1)).slice(-2);
+  	let d = ('00' + dt.getDate()).slice(-2);
+  	let today = y + '-' + m + '-' + d
+	document.getElementById("deadline").value = today
+	document.getElementById("deadline").value = today
+</script>
+{{template "footer"}}

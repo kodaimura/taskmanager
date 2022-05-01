@@ -1,0 +1,37 @@
+{{template "header" .}}
+<link rel="stylesheet" href="/css/group.css">
+<div class="w-75 px-5">
+	<h2>Make Group/Belong to Group</h2>
+	<div class="error mb-1">
+		{{.error}}
+	</div>
+	<div class="mb-5">
+  	<form id="gform" method="POST">
+  		<div class="mb-3">
+    	<input type="text" class="form-control" placeholder="Groupname" 
+    	name="groupname" required="required">
+    	</div>
+    	<div class="mb-3">
+    	<input type="password" class="form-control" placeholder="Password" 
+    	name="password" required="required">
+    	</div>
+    	<input type="submit" class="btn btn-primary btn-md" onclick="setAction()" 
+    	value="Make and Belong to New Group">
+    	<input type="submit" class="btn btn-success btn-md" onclick="setAction2()" 
+    	value="Belong to Existing Group">
+  	</form>
+  	</div>
+  	<div class="form-footer">
+    	<p><a href="/">Back</a></p>
+  	</div>
+ </div>
+<script>
+	const formObject = document.getElementById('gform');
+	const setAction = () => {
+  		formObject.action = "/group";
+	}
+	const setAction2 = () => {
+  		formObject.action = "/belong";
+	}
+</script>
+{{template "footer"}}
