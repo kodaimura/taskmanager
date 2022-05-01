@@ -58,7 +58,7 @@ func (gr *groupRepository)SelectByGId(gid int) (entity.Group, error){
 	var g entity.Group
 	err := gr.db.QueryRow(
 		`SELECT GID, GROUP_NAME, CREATE_AT, UPDATE_AT 
-		FROM GROUPS WHERE GID = ?`, gid,
+		 FROM GROUPS WHERE GID = ?`, gid,
 	).Scan(
 		&g.GId, &g.GroupName, &g.CreateAt, &g.UpdateAt,
 	)
@@ -71,7 +71,7 @@ func (gr *groupRepository)SelectByGroupName(groupName string) (entity.Group, err
 	var g entity.Group
 	err := gr.db.QueryRow(
 		`SELECT GID, GROUP_NAME, PASSWORD, CREATE_AT, UPDATE_AT 
-		FROM GROUPS WHERE GROUP_NAME = ?`, groupName,
+		 FROM GROUPS WHERE GROUP_NAME = ?`, groupName,
 	).Scan(
 		&g.GId, &g.GroupName, &g.Password, &g.CreateAt, &g.UpdateAt,
 	)
