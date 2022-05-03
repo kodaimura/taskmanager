@@ -28,8 +28,15 @@ func (gr *generalRepository)SelectByClass(class string) ([]entity.General, error
 	var ls []entity.General
 
 	rows, err := gr.db.Query(
-		`SELECT CLASS, KEY1, KEY2, VALUE1, VALUE2, REMARKS 
-		 FROM GENERALS WHERE CLASS = ?`, class,
+		`SELECT 
+			CLASS, 
+			KEY1, 
+			KEY2,
+			VALUE1, 
+			VALUE2, 
+			REMARKS 
+		 FROM GENERALS 
+		 WHERE CLASS = ?`, class,
 	)
 
 	if err != nil {
@@ -51,8 +58,10 @@ func (gr *generalRepository)SelectByClass(class string) ([]entity.General, error
 
 func insert(db *sql.DB, class, key1, key2, value1, value2, remarks string) {
 	_, err := db.Exec(
-		`INSERT INTO GENERALS (CLASS, KEY1, KEY2, VALUE1, VALUE2, REMARKS) 
-		VALUES(?,?,?,?,?,?)`, class, key1, key2, value1, value2, remarks,
+		`INSERT INTO GENERALS (
+			CLASS, KEY1, KEY2, VALUE1, VALUE2, REMARKS
+		 ) VALUES(?,?,?,?,?,?)`, 
+		 class, key1, key2, value1, value2, remarks,
 	)
 
 	if err != nil {
@@ -94,4 +103,9 @@ func init() {
 	insert(db, "task_state", "2", "", "progress", "", "")
 	insert(db, "task_state", "3", "", "close", "", "")
 	insert(db, "task_state", "4", "", "cancel", "", "")
+
+	insert(db, "task_priority", "1", "", "A", "", "")
+	insert(db, "task_priority", "2", "", "B", "", "")
+	insert(db, "task_priority", "3", "", "C", "", "")
+	insert(db, "task_priority", "4", "", "D", "", "")
 }

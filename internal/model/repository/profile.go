@@ -58,7 +58,11 @@ func NewProfileRepository() ProfileRepository {
 func (pr *profileRepository) SelectByUId(uid int) (entity.Profile, error){
 	var p entity.Profile
 	err := pr.db.QueryRow(
-		`SELECT UID, GID, CREATE_AT, UPDATE_AT
+		`SELECT 
+		 	UID, 
+		 	GID, 
+		 	CREATE_AT, 
+		 	UPDATE_AT
 		 FROM PROFILES
 		 WHERE UID = ?`, uid,
 	).Scan(
@@ -80,7 +84,9 @@ func (pr *profileRepository) Upsert(profile *entity.Profile) error {
 
 func (pr *profileRepository) UpdateByUId(uid int, profile *entity.Profile) error {
 	_, err := pr.db.Exec(
-		`UPDATE USERS SET GID = ? WHERE UID = ?`,
+		`UPDATE USERS SET 
+		 	GID = ? 
+		 WHERE UID = ?`,
 		profile.GId, uid,
 	)
 	return err
@@ -91,7 +97,10 @@ func (pr *profileRepository) GetProfileExp1ByUId(uid int) (dto.ProfileExp1, erro
 	var pe dto.ProfileExp1
 	err := pr.db.QueryRow(
 		`SELECT 
-			P.UID, U.USER_NAME, P.GID, G.GROUP_NAME
+			P.UID, 
+			U.USER_NAME, 
+			P.GID, 
+			G.GROUP_NAME
 		 FROM PROFILES AS P
 		 LEFT JOIN GROUPS AS G ON P.GID = G.GID 
 		 JOIN USERS AS U ON P.UID = U.UID

@@ -8,6 +8,7 @@ type TaskInsertDto struct {
 	Percent int `json:"percent"`
 	StateId int `json:"stateid"`
 	Deadline string `json:"deadline"`
+	PriorityId int `json: "priorityid"`
 }
 
 
@@ -17,6 +18,7 @@ type TaskUpdateDto struct {
 	Percent int `json:"percent"`
 	StateId int `json:"stateid"`
 	Deadline string `json:"deadline"`
+	PriorityId int `json: "priorityid"`
 }
 
 
@@ -29,6 +31,8 @@ type TaskExp1 struct {
 	StateId int `json:"stateid"`
 	State string `json:"state"`
 	Deadline string `json:"deadline"`
+	PriorityId int `json: "priorityid"`
+	Priority string `json: "priority"`
 	CreateAt string `json:"createat"`
 	UpdateAt string `json:"updateat"`
 }

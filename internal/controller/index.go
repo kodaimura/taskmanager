@@ -48,9 +48,14 @@ func (ic indexController) IndexPage(c *gin.Context) {
         return
     }
 
+    state := c.Query("state")
+    deadline := c.Query("deadline")
+    priority := c.Query("priority")
+
     members, err := ic.ur.SelectByGId(gid)
-    tasks, err := ic.tr.SelectByUId(uid, c.Query("state"), c.Query("deadline"))
+    tasks, err := ic.tr.SelectByUId(uid, state, deadline, priority)
     status, _ := ic.ger.SelectByClass("task_state")
+    priorities, _ := ic.ger.SelectByClass("task_priority")
 
     c.HTML(200, "index.html", gin.H{
         "appname": constants.AppName,
@@ -59,6 +64,7 @@ func (ic indexController) IndexPage(c *gin.Context) {
         "members": members,
         "tasks": tasks,
         "status": status,
+        "priorities": priorities,
     })
 }
 
@@ -91,9 +97,14 @@ func (ic indexController) MemberPage(c *gin.Context) {
         return
     }
 
+    state := c.Query("state")
+    deadline := c.Query("deadline")
+    priority := c.Query("priority")
+
     members, _ := ic.ur.SelectByGId(gid)
-    tasks, _ := ic.tr.SelectByUId(uid, c.Query("state"), c.Query("deadline"))
+    tasks, _ := ic.tr.SelectByUId(uid, state, deadline, priority)
     status, _ := ic.ger.SelectByClass("task_state")
+    priorities, _ := ic.ger.SelectByClass("task_priority")
 
     c.HTML(200, "tasks.html", gin.H{
         "appname": constants.AppName,
@@ -102,6 +113,7 @@ func (ic indexController) MemberPage(c *gin.Context) {
         "members": members,
         "tasks": tasks,
         "status": status,
+        "priorities": priorities,
     })
 }
 
@@ -130,8 +142,14 @@ func (ic indexController) Task(c *gin.Context) {
     if err != nil {
         stid = 1
     }
+
+    prid, err := strconv.Atoi(c.PostForm("priorityid"))
+    if err != nil {
+        prid = 1
+    }
     td.Percent = per
     td.StateId = stid
+    td.PriorityId = prid
 
     err = ic.tr.Insert(td)
 
@@ -173,8 +191,15 @@ func (ic indexController) UpdateTask(c *gin.Context) {
     if err != nil {
         stid = 1
     }
+
+    prid, err := strconv.Atoi(c.PostForm("priorityid"))
+    if err != nil {
+        prid = 1
+    }
+
     td.Percent = per
     td.StateId = stid
+    td.PriorityId = prid
 
     err = ic.tr.Update(td, tid, uid)
 

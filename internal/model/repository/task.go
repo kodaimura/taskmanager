@@ -21,6 +21,7 @@ func init(){
 			PERCENT INTEGER NOT NULL,
 			STATE_ID INTEGER NOT NULL,
 			DEADLINE VARCHAR(10),
+			PRIORITY_ID INTEGER NOT NULL,
 			CREATE_AT TEXT NOT NULL DEFAULT (DATETIME('now', 'localtime')),
 			UPDATE_AT TEXT NOT NULL DEFAULT (DATETIME('now', 'localtime'))
 		);
@@ -41,7 +42,7 @@ func init(){
 
 
 type TaskRepository interface {
-    SelectByUId(uid int, state, deadline string) ([]dto.TaskExp1, error)
+    SelectByUId(uid int, state, deadline, priority string) ([]dto.TaskExp1, error)
     SelectByTId(tid int) (dto.TaskExp1, error)
     Insert(tuDto *dto.TaskInsertDto) error
     Update(tuDto *dto.TaskUpdateDto, tid, uid int) error
@@ -59,18 +60,32 @@ func NewTaskRepository() TaskRepository {
 }
 
 
-func (tr *taskRepository)SelectByUId(uid int, state, deadline string) ([]dto.TaskExp1, error){
+func (tr *taskRepository)SelectByUId(uid int, state, deadline, priority string) ([]dto.TaskExp1, error){
 	var tasks []dto.TaskExp1
 	rows, err := tr.db.Query(
 		`SELECT 
-			TID, UID, TASK, MEMO, PERCENT, STATE_ID,
-			GE.VALUE1 AS STATE, DEADLINE, T.CREATE_AT, T.UPDATE_AT
+			TID, 
+			UID, 
+			TASK, 
+			MEMO, 
+			PERCENT, 
+			STATE_ID, 
+			GE.VALUE1 AS STATE, 
+			DEADLINE, 
+			PRIORITY_ID, 
+			GE2.VALUE1 AS PRIORITY,
+			T.CREATE_AT, 
+			T.UPDATE_AT
 		 FROM TASKS AS T
 		 LEFT JOIN GENERALS AS GE 
-		 ON T.STATE_ID = GE.KEY1 AND GE.CLASS = 'task_state'
+		 	ON T.STATE_ID = GE.KEY1 AND GE.CLASS = 'task_state'
+		 LEFT JOIN GENERALS AS GE2 
+		 	ON T.PRIORITY_ID = GE2.KEY1 AND GE2.CLASS = 'task_priority'
 		 WHERE UID = ?
 		 AND (? = "" OR STATE = ?)
-		 AND (? = "" OR DEADLINE = ?)`, uid, state, state, deadline, deadline,
+		 AND (? = "" OR DEADLINE = ?)
+		 AND (? = "" OR PRIORITY = ?)`,
+		 uid, state, state, deadline, deadline, priority, priority,
 	)
 
 	if err != nil {
@@ -80,8 +95,9 @@ func (tr *taskRepository)SelectByUId(uid int, state, deadline string) ([]dto.Tas
 	for rows.Next() {
 		t := dto.TaskExp1{}
 		err = rows.Scan(
-			&t.TId, &t.UId, &t.Task, &t.Memo, &t.Percent, &t.StateId,
-			&t.State, &t.Deadline, &t.CreateAt, &t.UpdateAt,
+			&t.TId, &t.UId, &t.Task, &t.Memo, &t.Percent, 
+			&t.StateId, &t.State, &t.Deadline, 
+			&t.PriorityId, &t.Priority, &t.CreateAt, &t.UpdateAt,
 		)
 		if err != nil {
 			break
@@ -97,15 +113,28 @@ func (tr *taskRepository)SelectByTId(tid int) (dto.TaskExp1, error){
 	var t dto.TaskExp1
 	err := tr.db.QueryRow(
 		`SELECT
-			TID, UID, TASK, MEMO, PERCENT, STATE_ID
-			STATE, DEADLINE, T.CREATE_AT, T.UPDATE_AT
+			TID, 
+			UID, 
+			TASK, 
+			MEMO, 
+			PERCENT, 
+			STATE_ID, 
+			GE.VALUE1 AS STATE, 
+			DEADLINE, 
+			PRIORITY_ID, 
+			GE2.VALUE1 AS PRIORITY , 
+			T.CREATE_AT, 
+			T.UPDATE_AT
 		 FROM TASKS AS T
-		 RIGHT JOIN GENERALS AS GE 
-		 ON GE.KEY1 = T.STATE_ID AND GE.CLASS = 'task_state'
+		 LEFT JOIN GENERALS AS GE 
+		 	ON T.STATE_ID = GE.KEY1 AND GE.CLASS = 'task_state'
+		 LEFT JOIN GENERALS AS GE2 
+		 	ON T.PRIORITY_ID = GE2.KEY1 AND GE2.CLASS = 'task_priority'
 		 WHERE TID = ?`, tid,
 	).Scan(
-		&t.TId, &t.UId, &t.Task, &t.Memo, &t.Percent, &t.StateId,
-		&t.State, &t.Deadline, &t.CreateAt, &t.UpdateAt,
+		&t.TId, &t.UId, &t.Task, &t.Memo, &t.Percent, 
+			&t.StateId, &t.State, &t.Deadline, 
+			&t.PriorityId, &t.Priority, &t.CreateAt, &t.UpdateAt,
 	)
 
 	return t, err
@@ -114,10 +143,12 @@ func (tr *taskRepository)SelectByTId(tid int) (dto.TaskExp1, error){
 
 func (tr *taskRepository)Insert(tiDto *dto.TaskInsertDto) error {
 	_, err := tr.db.Exec(
-		`INSERT INTO TASKS (UID, TASK, MEMO, PERCENT, STATE_ID, DEADLINE) 
-		 VALUES(?, ?, ?, ?, ?, ?)`,
-		tiDto.UId, tiDto.Task, tiDto.Memo, 
-		tiDto.Percent, tiDto.StateId, tiDto.Deadline,
+		`INSERT INTO TASKS (
+			UID, TASK, MEMO, PERCENT, STATE_ID, DEADLINE, PRIORITY_ID
+		 ) 
+		 VALUES(?, ?, ?, ?, ?, ?, ?)`,
+		tiDto.UId, tiDto.Task, tiDto.Memo, tiDto.Percent, 
+		tiDto.StateId, tiDto.Deadline, tiDto.PriorityId,
 	)
 	return err
 }
@@ -126,9 +157,15 @@ func (tr *taskRepository)Insert(tiDto *dto.TaskInsertDto) error {
 func (tr *taskRepository)Update(tuDto *dto.TaskUpdateDto, tid, uid int) error {
 	_, err := tr.db.Exec(
 		`UPDATE TASKS SET 
-			TASK = ?, MEMO = ?, PERCENT = ?, STATE_ID = ?, DEADLINE = ?
+			TASK = ?, 
+			MEMO = ?, 
+			PERCENT = ?, 
+			STATE_ID = ?, 
+			DEADLINE = ?, 
+			PRIORITY_ID = ?
 		 WHERE TID = ? AND UID = ?`,
-		tuDto.Task, tuDto.Memo, tuDto.Percent, tuDto.StateId, tuDto.Deadline,
+		tuDto.Task, tuDto.Memo, tuDto.Percent, tuDto.StateId, 
+		tuDto.Deadline, tuDto.PriorityId,
 		tid, uid,
 	)
 	return err
