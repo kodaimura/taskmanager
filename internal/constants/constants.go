@@ -7,4 +7,4 @@ const HostName string = "localhost"
 
 const Port string = ":8080"
 
-const CookieExpires int = 108000
+const CookieExpires int = 3240000

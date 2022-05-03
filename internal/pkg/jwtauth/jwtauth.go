@@ -5,7 +5,6 @@ import (
     "log"
     "encoding/json"
     "time"
-    //"strings"
     "errors"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +14,7 @@ import (
 
 
 const JwtKeyName string = "token"
-const JwtExpires time.Duration = 108000
+const JwtExpires time.Duration = 3240000
 var secretKey string
 
 func init () {
